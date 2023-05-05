@@ -21,8 +21,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       host: true,
       proxy: {
         "/api": {
-          target: "http://192.168.10.56:8003/",
-          // target: "http://localhost:3200/",
+          target: "http://localhost:5600/",
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/api\/(sys|auth)\//, ""),
         },

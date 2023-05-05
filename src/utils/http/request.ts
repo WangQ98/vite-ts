@@ -1,10 +1,11 @@
 import axios from "axios";
+import { ElMessage } from "element-plus";
 import { cloneDeep } from "lodash-es";
 import qs from "qs";
 import { ContentTypeEnum, RequestEnum, ResultEnum } from "@/enums/";
 import { getToken } from "../auth";
 import { isString } from "../is";
-import { handleResult, joinTimestamp } from "./helper";
+import { joinTimestamp } from "./helper";
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import type { RequestOptions, Result } from "#/axios";
 
@@ -65,22 +66,8 @@ export default class Axios {
 
   interceptorsResponse() {
     this.axiosInstance.interceptors.response.use(
-      (response) => {
-        const { data, status } = response;
-        let resMsg = handleResult(status);
-        if (status === 200 && !resMsg && data) {
-          const { code = null } = data;
-          if (code) {
-            resMsg = handleResult(code);
-            if (!resMsg) {
-              return data;
-            }
-          } else {
-            return data;
-          }
-        } else {
-          return Promise.reject(resMsg);
-        }
+      (response: AxiosResponse<any>) => {
+        return response;
       },
       (error) => {
         return Promise.reject(error);
@@ -106,7 +93,6 @@ export default class Axios {
         .then((res: AxiosResponse<Result>) => {
           try {
             const ret = this.transformResponseHook(res, opt);
-
             resolve(ret);
           } catch (err) {
             reject(err || new Error("request error!"));
@@ -149,25 +135,32 @@ export default class Axios {
     };
   }
   transformResponseHook(res: AxiosResponse<Result>, options: RequestOptions) {
-    const { isTransformResponse } = options;
+    const { isTransformResponse = true, isReturnNativeResponse = false } =
+      options;
+    if (isReturnNativeResponse) {
+      return res;
+    }
     // 不进行任何处理，直接返回
     // 用于页面代码可能需要直接获取code，data，message这些信息时开启
     if (!isTransformResponse) {
-      return res?.data ? res.data : res;
+      return res.data;
     }
     // 错误的时候返回
     const { data: result } = res;
+
     if (!result) {
-      // return '[HTTP] Request has no return value';
       throw new Error("请求出错，请稍候重试");
     }
     const { code, data, msg } = result;
+
     const hasSuccess =
-      data && Reflect.has(data, "code") && code === ResultEnum.SUCCESS;
+      data && Reflect.has(result, "code") && code === ResultEnum.SUCCESS;
 
     if (hasSuccess) {
       return data;
     }
+
+    ElMessage.error(msg || "请求出错，请稍候重试");
 
     throw new Error(msg);
   }

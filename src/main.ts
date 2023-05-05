@@ -3,7 +3,6 @@ import "uno.css";
 import "element-plus/theme-chalk/index.css";
 import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/index.less";
-import "@wang-qing/xdesk/style.css"
 
 import { createApp } from "vue";
 import { setupRouterGuard } from "./router/guard";

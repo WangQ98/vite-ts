@@ -11,8 +11,12 @@ declare global {
   declare interface ViteEnv {
     VITE_PORT: number;
     VITE_DROP_CONSOLE: boolean;
+    VITE_APP_BASE_API: string;
+    VITE_APP_BASE_URL: string;
     // plugin
     VITE_USE_MOCK: boolean;
+    // project
+    VITE_LOAD_ALL_WIDGET: boolean;
   }
 }
 
